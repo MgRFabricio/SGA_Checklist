@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sga-checklist-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sga_checklist}
+      POSTGRES_USER: ${POSTGRES_USER:-sga}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sga_local_dev}
+      TZ: America/Sao_Paulo
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - sga_postgres_data:/var/lib/postgresql/data
+      - ./doc_tec/sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  sga_postgres_data:
